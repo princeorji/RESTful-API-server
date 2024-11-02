@@ -1,7 +1,7 @@
 const Task = require('../models/task');
 
 const create = async (req, res, next) => {
-  const { title, description, dueDate, status } = req.body;
+  const { title, description, dueDate, status, priority, tags } = req.body;
 
   try {
     const task = await Task.create({
@@ -9,6 +9,9 @@ const create = async (req, res, next) => {
       description,
       dueDate,
       status,
+      priority,
+      tags,
+      createdBy: req.user.id,
     });
 
     res.status(201).json(task);
@@ -20,10 +23,23 @@ const create = async (req, res, next) => {
 const tasks = async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-
   const skip = (page - 1) * limit;
+
+  const filter = {};
+
+  if (req.query.status) {
+    filter.status = req.query.status;
+  }
+  if (req.query.priority) {
+    filter.priority = req.query.priority;
+  }
+  if (req.query.tags) {
+    // allow multiple tags
+    filter.tags = { $in: req.query.tags.split(',') };
+  }
+
   try {
-    const tasks = await Task.find().skip(skip).limit(limit);
+    const tasks = await Task.find(filter).skip(skip).limit(limit);
 
     res.status(200).json({ tasks, page, limit });
   } catch (error) {
