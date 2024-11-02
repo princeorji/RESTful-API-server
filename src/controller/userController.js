@@ -40,7 +40,7 @@ const login = async (req, res, next) => {
     }
 
     // generate access token
-    const accessToken = jwt.sign({ id: user._id }, env.JWT_SECRET, {
+    const accessToken = jwt.sign({ _id: user._id }, env.JWT_SECRET, {
       expiresIn: '1h',
     });
 
